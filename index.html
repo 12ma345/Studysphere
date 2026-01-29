@@ -1,0 +1,1107 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <img src="logo.png" alt="Logo" width="150">
+
+<meta charset="UTF-8" />
+<title>Study Sphere — Learn. Play. Grow.</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  :root{
+    --bg1:#e6f0ff;
+    --bg2:#dff4ff;
+    --card:#ffffff;
+    --accent:#1e73ff;
+    --accent-2:#00bcd4;
+    --muted:#666;
+    --glass: rgba(255,255,255,0.7);
+    --radius:16px;
+    --shadow: 0 6px 18px rgba(30,50,90,0.08);
+    --toast-bg: rgba(20,20,30,0.95);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    background: linear-gradient(160deg,var(--bg1),var(--bg2));
+    color:#123;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:18px;
+  }
+
+  .app {
+    width:100%;
+    max-width:1100px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95));
+    border-radius:20px;
+    box-shadow: var(--shadow);
+    padding:18px;
+    position:relative;
+    overflow:hidden;
+  }
+
+  /* Top arrows (back & next) */
+  .nav-arrow {
+    position:fixed;
+    top:18px;
+    width:44px;
+    height:44px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(180deg,var(--card),#f3f8ff);
+    box-shadow:0 8px 20px rgba(30,60,120,0.08);
+    cursor:pointer;
+    z-index:999;
+    transition:transform .12s ease;
+    border:1px solid rgba(0,0,0,0.05);
+  }
+  .nav-arrow:active{ transform:scale(.96); }
+  #arrow-next{ right:22px; }
+  #arrow-back{ left:22px; }
+  .nav-arrow svg{ width:20px; height:20px; color:var(--accent); }
+
+  header {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:8px;
+  }
+  header h1{
+    margin:0;
+    font-size:20px;
+    color:var(--accent);
+    letter-spacing:0.2px;
+  }
+  header p { margin:0; color:var(--muted); font-size:13px; }
+
+  .pages { display:block; width:100%; }
+
+  /* Page card */
+  .page {
+    display:none;
+    padding:18px;
+    border-radius:12px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.5));
+    margin-bottom:12px;
+  }
+  .page.active{ display:block; }
+
+  /* Welcome page */
+  .welcome {
+    display:flex;
+    gap:18px;
+    align-items:center;
+  }
+  .welcome .left {
+    flex:1;
+  }
+  .welcome .right {
+    width:320px;
+    background:linear-gradient(180deg,#fff, #f7fbff);
+    padding:12px;
+    border-radius:12px;
+    box-shadow:var(--shadow);
+  }
+  .welcome h2{ margin:8px 0 6px 0; color:var(--accent); }
+  .welcome p { margin:6px 0; color:#234; }
+
+  .cards {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:12px;
+    margin-top:12px;
+  }
+  .card{
+    background:var(--card);
+    border-radius:12px;
+    padding:12px;
+    box-shadow:var(--shadow);
+    border:1px solid rgba(0,0,0,0.03);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .card:hover{ transform:translateY(-6px); box-shadow: 0 12px 30px rgba(30,60,120,0.08); }
+  .card h3{ margin:0 0 6px 0; color:var(--accent-2); }
+  .card p{ margin:0; color:var(--muted); font-size:13px; }
+
+  /* Subjects area */
+  #subjectsGrid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:12px;
+    margin-top:12px;
+  }
+  .subjectItem{
+    background:linear-gradient(180deg,#fff,#fbfeff);
+    padding:10px;
+    border-radius:12px;
+    border:1px solid rgba(0,0,0,0.03);
+    cursor:pointer;
+    text-align:center;
+  }
+  .subjectItem h4{ margin:8px 0 4px 0; color:var(--accent); }
+  .subjectItem small{ color:var(--muted); display:block; }
+
+  /* Subject content */
+  #subjectContent {
+    margin-top:12px;
+    display:none;
+    border-radius:12px;
+    padding:12px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(250,250,255,0.9));
+    border:1px solid rgba(0,0,0,0.03);
+  }
+  #subjectContent.active{ display:block; }
+  .tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  .tabBtn {
+    background:transparent;
+    border:1px solid rgba(30,60,140,0.08);
+    padding:8px 10px;
+    border-radius:10px;
+    cursor:pointer;
+  }
+  .tabBtn.active{ background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#fff; border:none; box-shadow:0 8px 18px rgba(30,80,180,0.08); }
+
+  #subjectDetail { min-height:140px; padding:10px; border-radius:8px; background:rgba(250,250,255,0.7); border:1px dashed rgba(0,0,0,0.02); }
+
+  /* Breaktime fun */
+  #breakTimeFun {
+    margin-top:12px;
+    display:flex;
+    gap:12px;
+    flex-direction:column;
+  }
+  #funControls { display:flex; gap:8px; }
+  #funBox {
+    padding:12px;
+    border-radius:10px;
+    min-height:100px;
+    background:linear-gradient(180deg,#fff,#fbfeff);
+    border:1px solid rgba(0,0,0,0.03);
+  }
+  .hint { color:var(--muted); font-size:12px; }
+
+  /* Planner */
+  #plannerSection { margin-top:12px; display:flex; gap:12px; flex-direction:column; }
+  #plans .plan{ padding:8px; border-radius:8px; background:#fff; border:1px solid rgba(0,0,0,0.04); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+
+  /* Calculator (inside Maths tab) */
+  .calc-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; max-width:320px; }
+  .calc-grid button{ padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); cursor:pointer; background:#fff; }
+
+  /* Music */
+  iframe { width:100%; height:260px; border-radius:10px; border:none; }
+
+  /* Toast notifications */
+  #toast-container {
+    position:fixed;
+    right:22px;
+    bottom:22px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    z-index:2000;
+    max-width:320px;
+  }
+  .toast {
+    background:var(--toast-bg);
+    color:#fff;
+    padding:12px 14px;
+    border-radius:12px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.4);
+    opacity:0;
+    transform: translateY(10px) scale(.98);
+    transition: opacity .28s ease, transform .28s ease;
+    font-size:14px;
+    line-height:1.3;
+  }
+  .toast.show { opacity:1; transform: translateY(0) scale(1); }
+  .toast small { display:block; opacity:0.85; margin-top:8px; font-size:12px; color:rgba(255,255,255,0.85); }
+
+  /* Responsive */
+  @media (max-width:720px){
+    .welcome{ flex-direction:column; }
+    .welcome .right{ width:100%; }
+    #arrow-next, #arrow-back { width:40px; height:40px; top:12px; }
+  }
+  /* =====================
+   DARK MODE
+===================== */
+
+body.dark {
+  --bg1:#0f172a;
+  --bg2:#020617;
+  --card:#0b1220;
+  --accent:#60a5fa;
+  --accent-2:#22d3ee;
+  --muted:#9ca3af;
+  --glass: rgba(30,41,59,0.7);
+  --toast-bg: rgba(15,23,42,0.95);
+  color:#e5e7eb;
+}
+
+body.dark .page,
+body.dark .subjectItem,
+body.dark .card,
+body.dark #funBox,
+body.dark #subjectDetail,
+body.dark .right,
+body.dark .plan {
+  background: #0b1220;
+  color:#e5e7eb;
+}
+
+body.dark input,
+body.dark button {
+  background:#020617;
+  color:#e5e7eb;
+  border-color:#1e293b;
+}
+
+body.dark iframe {
+  filter: brightness(0.85);
+}
+</style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Study Sphere">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <h1>Study Sphere
+            <button id="themeToggle" class="tabBtn" style="margin-top:8px;">
+  🌙 Dark Mode
+</button>
+        <p style="margin-top:6px; color:var(--muted); font-size:13px;">Ignite curiosity — short lessons, fun breaks, and tools for learning.</p>
+      </div>
+      <div style="text-align:right;">
+        <small style="color:var(--muted);">Modern learning for young minds</small>
+      </div>
+    </div>
+
+    <!-- Navigation arrows (always visible) -->
+    <div id="arrow-back" class="nav-arrow" title="Back" onclick="prevPage()" aria-hidden="false">
+      <!-- left arrow -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div id="arrow-next" class="nav-arrow" title="Next" onclick="nextPage()" aria-hidden="false">
+      <!-- right arrow -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <!-- Pages container -->
+    <div class="pages">
+      <!-- Page 1: Welcome -->
+      <section id="page-1" class="page active" data-title="Welcome">
+        <div class="welcome">
+          <div class="left">
+            <h2>Welcome to Study Sphere 🎉</h2>
+            <p>Study Sphere is a friendly learning space built to help students study smarter and take fun, short breaks. On this app you will find subject notes, quizzes, a maths calculator, planner, music playlist, and a big collection of quotes, facts, and riddles to spark your curiosity.</p>
+
+            <div class="cards" style="margin-top:14px;">
+              <div class="card">
+                <h3>Learn</h3>
+                <p>Short notes and quizzes for quick study sessions.</p>
+              </div>
+              <div class="card">
+                <h3>Play</h3>
+                <p>Riddles and facts to challenge your mind during breaks.</p>
+              </div>
+              <div class="card">
+                <h3>Organize</h3>
+                <p>Use the planner to structure study times and rest periods.</p>
+              </div>
+              <div class="card">
+                <h3>Listen</h3>
+                <p>Music playlist for a calm or focused study environment.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="right">
+            <h3 style="margin-top:4px;">Quick tips</h3>
+            <p style="color:var(--muted); font-size:14px;">• Use short focused study sessions (25–40 mins).<br>• Take a 5–10 minute break — try a riddle or a fact!<br>• Save plans in the planner and review quizzes daily.</p>
+            <hr style="margin:10px 0;">
+            <p style="font-size:13px; color:var(--muted);">Tip: Toast quotes will appear every 15 minutes in the bottom-right as gentle motivation (close automatically after 5 minutes).</p>
+            <div style="margin-top:10px;">
+              <button class="tabBtn" onclick="goToPage(2)">Go to Grades & Subjects →</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Page 2: Grade Selection & Subjects -->
+      <section id="page-2" class="page" data-title="Subjects">
+        <h2>Choose Grade & Subject</h2>
+        <p style="color:var(--muted)">Select a grade to reveal subject choices. Each subject has short notes and quizzes. Maths includes a calculator tab.</p>
+
+        <div id="gradeButtons" style="margin-top:12px;">
+          <button class="tabBtn" onclick="chooseGrade('Grade 7')">Grade 7</button>
+          <button class="tabBtn" onclick="chooseGrade('Grade 8')">Grade 8</button>
+        </div>
+
+        <div id="subjectsGrid" style="margin-top:12px;">
+          <div class="subjectItem" onclick="openSubject('Amharic')">
+            <h4>Amharic</h4><small>Language & literature basics</small>
+          </div>
+          <div class="subjectItem" onclick="openSubject('English')">
+            <h4>English</h4><small>Reading, grammar & vocabulary</small>
+          </div>
+          <div class="subjectItem" onclick="openSubject('Maths')">
+            <h4>Maths</h4><small>Numbers, algebra, and calculator</small>
+          </div>
+          <div class="subjectItem" onclick="openSubject('Social Study')">
+            <h4>Social Study</h4><small>History & civics</small>
+          </div>
+          <div class="subjectItem" onclick="openSubject('Citizenship')">
+            <h4>Citizenship</h4><small>Rights, duties & community</small>
+          </div>
+          <div class="subjectItem" onclick="openSubject('General Science')">
+            <h4>General Science</h4><small>Basic science principles</small>
+          </div>
+        </div>
+
+        <!-- Subject content panel -->
+        <div id="subjectContent" aria-live="polite">
+          <h3 id="subjectTitle" style="margin-top:12px;"></h3>
+          <p id="subjectDesc" style="color:var(--muted); margin-top:4px;"></p>
+
+          <div class="tabs" style="margin-top:12px;">
+            <button class="tabBtn" onclick="showContent('Textbooks')">Textbooks</button>
+            <button class="tabBtn" onclick="showContent('Videos')">Videos</button>
+            <button id="calcTab" class="tabBtn" onclick="showContent('Calculator')" style="display:none;">Calculator</button>
+          </div>
+
+          <div id="subjectDetail">Choose a tab to view materials.</div>
+        </div>
+      </section>
+
+      <!-- Page 3: Breaktime Fun + Planner + Music -->
+      <section id="page-3" class="page" data-title="Fun & Tools">
+        <h2>Breaktime Fun & Tools</h2>
+        <p style="color:var(--muted)">Grab a short break — read a quote, learn an interesting fact, or solve a riddle. Planner and music are below to help you stay organized and focused.</p>
+<iframe src="https://youtu.be/_ot_60yeClo?si=I7Jrk9gcPMys88Za"  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        <div id="breakTimeFun">
+          <div id="funControls">
+            <button class="tabBtn" onclick="showCategory('quotes')">Quote</button>
+            <button class="tabBtn" onclick="showCategory('facts')">Fact</button>
+            <button class="tabBtn" onclick="showCategory('riddles')">Riddle</button>
+            <button class="tabBtn" onclick="shuffleFunBox()">Shuffle</button>
+          </div>
+          <div id="funBox">Click a button to see something fun. Quotes are also sent automatically as small notifications at the bottom right every 3 minutes.</div>
+          <div class="hint">Notes: Quotes rotate automatically as toast messages; use the buttons above to view facts or riddles here.</div>
+        </div>
+
+        <hr style="margin:14px 0;">
+
+        <div id="plannerSection">
+          <h3>Planner</h3>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <input type="text" id="planInput" placeholder="Plan description" style="flex:1; padding:8px; border-radius:8px; border:1px solid rgba(0,0,0,0.06)" />
+            <input type="time" id="startTime" style="padding:8px; border-radius:8px; border:1px solid rgba(0,0,0,0.06)" />
+            <input type="time" id="endTime" style="padding:8px; border-radius:8px; border:1px solid rgba(0,0,0,0.06)" />
+            <button id="addBtn" class="tabBtn">Add Plan</button>
+          </div>
+          <div id="plans" style="margin-top:12px;"></div>
+        </div>
+
+        <hr style="margin:14px 0;">
+
+        <div id="musicSection">
+          <h3>Music Store (Playlist)</h3>
+          <p style="color:var(--muted)">A calming playlist to help you study or relax.</p>
+          <iframe src="https://www.youtube.com/embed/FS93cEWcwQA?si=c05dQpKRZGm_TRv4" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+      </section>
+    </div> <!-- pages -->
+
+    <!-- Toast container -->
+    <div id="toast-container" aria-live="polite" aria-atomic="false"></div>
+  </div>
+
+  <script>
+    /*********************
+ * Dark Mode Toggle
+ *********************/
+const toggleBtn = document.getElementById("themeToggle");
+
+// load saved theme
+if (localStorage.getItem("theme") === "dark") {
+  document.body.classList.add("dark");
+  toggleBtn.textContent = "☀️ Light Mode";
+}
+
+toggleBtn.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+
+  if (document.body.classList.contains("dark")) {
+    localStorage.setItem("theme", "dark");
+    toggleBtn.textContent = "☀️ Light Mode";
+  } else {
+    localStorage.setItem("theme", "light");
+    toggleBtn.textContent = "🌙 Dark Mode";
+  }
+});
+    /*********************
+     * Page navigation
+     *********************/
+    const pages = Array.from(document.querySelectorAll('.page'));
+    let currentPageIndex = 0;
+    function showPage(index){
+      if(index < 0) index = 0;
+      if(index >= pages.length) index = pages.length - 1;
+      currentPageIndex = index;
+      pages.forEach((p,i)=> p.classList.toggle('active', i===index));
+      // arrow visibility
+      document.getElementById('arrow-back').style.display = (index===0) ? 'none' : 'flex';
+      document.getElementById('arrow-next').style.display = (index===pages.length-1) ? 'none' : 'flex';
+    }
+    function nextPage(){ showPage(currentPageIndex + 1); }
+    function prevPage(){ showPage(currentPageIndex - 1); }
+    function goToPage(n){ showPage(n-1); } // pages numbered 1..n
+    // initial
+    showPage(0);
+
+    /*********************
+     * Subjects logic
+     *********************/
+    let selectedGrade = null;
+    function chooseGrade(g){ selectedGrade = g; alert('Selected ' + g); }
+    const subjectDescMap = {
+      "Amharic": "Explore reading and writing in Amharic with short notes and quizzes.",
+      "English": "Improve vocabulary, grammar, and reading skills with short lessons.",
+      "Maths": "Practice arithmetic, problem solving, and use the built-in calculator for help.",
+      "Social Study": "Discover history, geography and cultural knowledge.",
+      "Citizenship": "Learn rights, duties and how to be an active member of society.",
+      "General Science": "Experiment with ideas and learn science basics through simple notes."
+    };
+
+    const subjectData = {
+  "Grade 7": {
+    "Amharic": {
+      "Textbooks": ["https://www.anrseb.gov.et/wp-content/uploads/New_Text_Books/Grade7/Grade%207_Amharic_Textbook.pdf"],
+    },
+    "English": {
+      "Textbooks": ["https://www.anrseb.gov.et/wp-content/uploads/New_Text_Books/Grade7/Grade%207_English_Textbook.pdf"],
+    },
+    "Maths": { 
+      "Textbooks": ["https://www.anrseb.gov.et/wp-content/uploads/New_Text_Books/Grade7/Grade%207_Mathematics_Textbook.pdf"],
+    },
+    "Social Study": {
+      "Textbooks":["https://www.anrseb.gov.et/wp-content/uploads/New_Text_Books/Grade7/Grade%207_Social%20Study_Textbook.pdf"],
+    },
+    "Citizenship": {
+      "Textbooks":["https://www.anrseb.gov.et/wp-content/uploads/New_Text_Books/Grade7/Grade%207_Citizenship_Textbook.pdf"],
+    },
+    "General Science": {
+      "Textbooks":["https://www.anrseb.gov.et/wp-content/uploads/New_Text_Books/Grade7/Grade%207_General%20Science_Textbook.pdf"],
+    }
+  },
+
+  "Grade 8": {
+    "Amharic": {
+      "Textbooks": ["https://www.anrseb.gov.et/wp-content/uploads/New_Text_Books/Grade8/Grade%208_Amharic_Textbook.pdf"],
+    },
+    "English": {
+      "Textbooks": ["https://www.anrseb.gov.et/wp-content/uploads/New_Text_Books/Grade8/Grade%208_English_Textbook.pdf"],
+    },
+    "Maths": { 
+      "Textbooks": ["https://www.anrseb.gov.et/wp-content/uploads/New_Text_Books/Grade8/Grade%208_Mathematics_Textbook.pdf"],
+    },
+    "Social Study": {
+      "Textbooks":["https://www.anrseb.gov.et/wp-content/uploads/New_Text_Books/Grade8/Grade%208_Social%20Study_Textbook.pdf"],
+    },
+    "Citizenship": {
+      "Textbooks":["https://www.anrseb.gov.et/wp-content/uploads/New_Text_Books/Grade8/Grade%208_Citizenship_Textbook.pdf"],
+    },
+    "General Science": {
+      "Textbooks":["https://www.anrseb.gov.et/wp-content/uploads/New_Text_Books/Grade8/Grade%208_General%20Science_Textbook.pdf"],
+    }
+  }
+};
+const videos = {
+  "Grade 7": {
+    "Amharic": [
+      {
+        title: "Amharic Grade 7 – Lesson 1",
+        link: "https://www.youtube.com/embed/VIDEO_ID"
+      }
+    ],
+
+    "English": [
+      {
+        title: "English Grade 7 – Grammar Basics",
+        link: "https://www.youtube.com/embed/VIDEO_ID"
+      }
+    ]
+  },
+
+  "Grade 8": {
+    "English": [
+      {
+        title: "English Grade 8 – Introduction",
+        link: "https://www.youtube.com/embed/_ot_60yeClo"
+      }
+    ],
+
+    "Maths": [
+      {
+        title: "Maths Grade 8 – Integers",
+        link: "https://www.youtube.com/embed/VIDEO_ID"
+      }
+    ]
+  }
+};
+
+
+        
+    function openSubject(subject){
+      document.getElementById('subjectContent').classList.add('active');
+      document.getElementById('subjectTitle').textContent = subject;
+      document.getElementById('subjectDesc').textContent = subjectDescMap[subject] || '';
+      // show calculator tab only for Maths
+      document.getElementById('calcTab').style.display = (subject === 'Maths') ? 'inline-block' : 'none';
+      // reset details
+      document.getElementById('subjectDetail').innerHTML = 'Choose a tab to view materials.';
+      // put a small description for each subject page (so no big empty space)
+      const example = (subject==='Maths') ? "Use the calculator to test small arithmetic ideas here." : "Browse short notes and try the short quiz below.";
+      document.getElementById('subjectDetail').innerHTML = `<p style="color:var(--muted)">${example}</p>`;
+      // show the page 2's content area (if not visible)
+      // ensure page 2 is visible
+      showPage(1);
+    }
+
+    function showContent(cat){
+    function showContent(cat){
+
+  const subject = document.getElementById('subjectTitle').textContent;
+
+  if (!subject || !selectedGrade) {
+    alert("Please choose grade and subject first.");
+    return;
+  }
+
+  // ✅ VIDEOS
+  if (cat === "Videos") {
+
+    const videoList = videos[selectedGrade]?.[subject];
+
+    if (!videoList) {
+      document.getElementById("subjectDetail").innerHTML =
+        "<p>No videos available for this subject yet.</p>";
+      return;
+    }
+
+    let html = "<h4>🎥 Video Lessons</h4>";
+
+    videoList.forEach(v => {
+      html += `
+        <div style="margin-bottom:14px;">
+          <strong>${v.title}</strong>
+          <iframe
+            src="${v.link}"
+            allowfullscreen>
+          </iframe>
+        </div>
+      `;
+    });
+
+    document.getElementById("subjectDetail").innerHTML = html;
+    return;
+  }
+
+  // ✅ TEXTBOOKS & CALCULATOR BELOW
+  const data = subjectData[selectedGrade][subject][cat];
+  let html = '';
+
+  if (cat === "Textbooks") {
+    html = '<h4>📘 Textbooks</h4>';
+    (data || []).forEach(tb => {
+      html += `<div><a href="${tb}" target="_blank">Open textbook</a></div>`;
+    });
+  }
+
+  else if (cat === "Calculator") {
+    if (subject !== 'Maths') {
+      html = '<p>Calculator is available only in Maths.</p>';
+    } else {
+      html = `<h4>Calculator</h4>
+        <input id="calcInput" readonly style="width:100%; padding:10px;">
+        <div class="calc-grid">
+          <button onclick="press('7')">7</button>
+          <button onclick="press('8')">8</button>
+          <button onclick="press('9')">9</button>
+          <button onclick="press('/')">÷</button>
+          <button onclick="press('4')">4</button>
+          <button onclick="press('5')">5</button>
+          <button onclick="press('6')">6</button>
+          <button onclick="press('*')">×</button>
+          <button onclick="press('1')">1</button>
+          <button onclick="press('2')">2</button>
+          <button onclick="press('3')">3</button>
+          <button onclick="press('-')">−</button>
+          <button onclick="press('0')">0</button>
+          <button onclick="press('.')">.</button>
+          <button onclick="clearCalc()">C</button>
+          <button onclick="calculate()">=</button>
+        </div>`;
+    }
+  }
+
+  document.getElementById("subjectDetail").innerHTML = html;
+}
+
+      const subject = document.getElementById('subjectTitle').textContent;
+      if(!subject) { alert('Open a subject first.'); return; }
+      const data = subjectData[selectedGrade][subject][cat];
+      let html = '';
+      if(cat === "Textbooks"){
+        html = '<h4>Textbooks</h4>';
+        (data || []).forEach(tb => {
+          html += `<div><a href="${tb}" target="_blank">${tb}</a></div>`;
+        });
+      } else if(cat === "Calculator"){
+        // only allow for Maths
+        if(subject !== 'Maths'){ html = '<p>Calculator is available only in Maths.</p>'; }
+        else {
+          html = `<h4>Calculator</h4>
+            <input id="calcInput" readonly style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); margin-bottom:8px;" />
+            <div class="calc-grid">
+              <button onclick="press('7')">7</button><button onclick="press('8')">8</button><button onclick="press('9')">9</button><button onclick="press('/')">÷</button>
+              <button onclick="press('4')">4</button><button onclick="press('5')">5</button><button onclick="press('6')">6</button><button onclick="press('*')">×</button>
+              <button onclick="press('1')">1</button><button onclick="press('2')">2</button><button onclick="press('3')">3</button><button onclick="press('-')">−</button>
+              <button onclick="press('0')">0</button><button onclick="press('.')">.</button><button onclick="clearCalc()">C</button><button onclick="calculate()">=</button>
+            </div>
+            <small style="color:var(--muted)">Tip: Use the calculator for quick arithmetic while studying Maths.</small>
+          `;
+        }
+      }
+      document.getElementById('subjectDetail').innerHTML = html;
+    }
+
+    function checkAnswer(i){
+      const radios = document.getElementsByName('quiz'+i);
+      let selected;
+      for(const r of radios) if(r.checked) { selected = r.value; break; }
+      const answer = subjectData[document.getElementById('subjectTitle').textContent]['Quiz'][i].answer;
+      document.getElementById('result'+i).textContent = (selected === answer) ? ' Correct!' : ' Wrong!';
+    }
+
+    /* Calculator functions for Maths only */
+    function press(val){
+      const el = document.getElementById('calcInput');
+      if(!el) return;
+      el.value = (el.value || '') + val;
+    }
+    function clearCalc(){ const el = document.getElementById('calcInput'); if(el) el.value=''; }
+    function calculate(){ const el = document.getElementById('calcInput'); if(!el) return;
+      try{ /* safe eval: only numbers and operators allowed */ 
+        const safe = el.value.replace(/[^0-9+\-*/().]/g,'');
+        el.value = Function('"use strict";return (' + safe + ')')();
+      } catch(e){ el.value = 'Error'; }
+    }
+
+    /*********************
+     * Planner
+     *********************/
+    const plansDiv = document.getElementById('plans');
+    document.getElementById('addBtn').onclick = function(){
+      const planText = document.getElementById('planInput').value;
+      const start = document.getElementById('startTime').value;
+      const end = document.getElementById('endTime').value;
+      if(planText && start && end){
+        const div = document.createElement('div');
+        div.className = 'plan';
+        div.innerHTML = `<span>${planText} (${start} - ${end})</span><button style="margin-left:12px" onclick="this.parentElement.remove()">Delete</button>`;
+        plansDiv.prepend(div);
+        document.getElementById('planInput').value='';
+        document.getElementById('startTime').value='';
+        document.getElementById('endTime').value='';
+      } else {
+        alert('Please fill plan description, start and end time.');
+      }
+    }
+
+    /*********************
+     * Quotes / Facts / Riddles arrays (100 each)
+     * - Quotes are used as toast notifications every 15 minutes
+     * - Toast disappears after 5 minutes
+     *********************/
+    const quotes = [
+      "Believe you can and you're halfway there.",
+      "Education is the most powerful weapon which you can use to change the world.",
+      "The only way to do great work is to love what you do.",
+      "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+      "Don't watch the clock; do what it does. Keep going.",
+      "The future depends on what you do today.",
+      "Start where you are. Use what you have. Do what you can.",
+      "Dream big and dare to fail.",
+      "Hard work beats talent when talent doesn't work hard.",
+      "It always seems impossible until it's done.",
+      "Learning never exhausts the mind.",
+      "You are never too old to set another goal or to dream a new dream.",
+      "The expert in anything was once a beginner.",
+      "Small steps every day add up to big results.",
+      "Doubt kills more dreams than failure ever will.",
+      "Be curious, not judgmental.",
+      "The secret of getting ahead is getting started.",
+      "If you can dream it, you can do it.",
+      "Your attitude determines your direction.",
+      "Mistakes are proof that you are trying.",
+      "Stay positive, work hard, make it happen.",
+      "Knowledge is power.",
+      "Education is not preparation for life; education is life itself.",
+      "What we learn with pleasure we never forget.",
+      "Practice makes permanent.",
+      "Believe in yourself and all that you are.",
+      "A little progress each day adds up to big results.",
+      "If you're going through hell, keep going.",
+      "Don't stop until you're proud.",
+      "The beautiful thing about learning is nobody can take it away from you.",
+      "Winners are not afraid of losing. But losers are.",
+      "Success doesn't come to you — you go to it.",
+      "The difference between ordinary and extraordinary is that little extra.",
+      "Work hard in silence. Let your success be your noise.",
+      "The best way to predict the future is to create it.",
+      "You miss 100% of the shots you don't take.",
+      "Start by doing what's necessary; then do what's possible; and suddenly you are doing the impossible.",
+      "Perseverance is failing 19 times and succeeding the 20th.",
+      "Be the change you wish to see in the world.",
+      "The harder you work for something, the greater you'll feel when you achieve it.",
+      "You don't have to be great to start, but you have to start to be great.",
+      "Education is the passport to the future, for tomorrow belongs to those who prepare for it today.",
+      "Don't be pushed around by the fears in your mind. Be led by the dreams in your heart.",
+      "Success is walking from failure to failure with no loss of enthusiasm.",
+      "What you do today can improve all your tomorrows.",
+      "A goal without a plan is just a wish.",
+      "If you want to lift yourself up, lift up someone else.",
+      "You are braver than you believe and stronger than you seem.",
+      "The only limit to our realization of tomorrow will be our doubts of today.",
+      "Failure is simply the opportunity to begin again, this time more intelligently.",
+      "Don't let what you cannot do interfere with what you can do.",
+      "Success usually comes to those who are too busy to be looking for it.",
+      "The mind is not a vessel to be filled but a fire to be kindled.",
+      "Education is a progressive discovery of our own ignorance.",
+      "Try not to become a person of success, but rather try to become a person of value.",
+      "Be stubborn about your goals and flexible about your methods.",
+      "Great things never came from comfort zones.",
+      "Do something today that your future self will thank you for.",
+      "If opportunity doesn't knock, build a door.",
+      "Don't wish it were easier. Wish you were better.",
+      "The only person you are destined to become is the person you decide to be.",
+      "Start each day with a positive thought and a grateful heart.",
+      "Knowledge will bring you the opportunity to make a difference.",
+      "You cannot climb the ladder of success with your hands in your pockets.",
+      "The important thing is not to stop questioning.",
+      "The capacity to learn is a gift; the ability to learn is a skill; the willingness to learn is a choice.",
+      "Difficult roads often lead to beautiful destinations.",
+      "You must do the things you think you cannot do.",
+      "The harder the conflict, the greater the triumph.",
+      "Education is the key to unlocking the world, a passport to freedom.",
+      "An investment in knowledge pays the best interest.",
+      "Cherish your visions and your dreams as they are the children of your soul.",
+      "Don't wait for opportunity. Create it.",
+      "If you don't build your dream, someone else will hire you to help build theirs.",
+      "To learn is to change. Education is a process that changes you.",
+      "The best preparation for tomorrow is doing your best today.",
+      "If you learn from defeat, you haven't really lost.",
+      "Success is the sum of small efforts, repeated day in and day out.",
+      "The only source of knowledge is experience.",
+      "You can't cross the sea merely by standing and staring at the water.",
+      "A positive attitude causes a chain reaction of positive thoughts, events and outcomes.",
+      "Great work is done by those who are not afraid to be great.",
+      "Work until your idols become your rivals.",
+      "Don't count the days; make the days count.",
+      "Education begins the gentleman, but reading, good company and reflection must finish him.",
+      "Success is liking yourself, liking what you do, and liking how you do it.",
+      "The only impossible journey is the one you never begin.",
+      "If you want to achieve greatness stop asking for permission.",
+      "Act as if what you do makes a difference. It does."
+    ];
+
+    const facts = [
+      "Honey never spoils — archaeologists have found edible honey in ancient Egyptian tombs.",
+      "A group of flamingos is called a 'flamboyance'.",
+      "Bananas are berries, botanically speaking.",
+      "Octopuses have three hearts.",
+      "A day on Venus is longer than a year on Venus.",
+      "There are more stars in the universe than grains of sand on all Earth's beaches.",
+      "The human nose can detect over 1 trillion scents.",
+      "Some turtles can breathe through their butts (cloacal respiration).",
+      "A bolt of lightning contains enough energy to toast 100,000 slices of bread.",
+      "Blue whales are the largest animals ever known to have lived on Earth.",
+      "Wombat poop is cube-shaped.",
+      "There are more possible iterations of a game of chess than atoms in the known universe.",
+      "A single strand of human hair can support up to 100 grams before breaking.",
+      "Sharks have been around longer than trees.",
+      "Hot water freezes faster than cold water under certain conditions (Mpemba effect).",
+      "A full NASA space suit costs about $12 million.",
+      "The Eiffel Tower can be 15 cm taller during hot days due to thermal expansion.",
+      "A day on Mercury lasts about 59 Earth days.",
+      "The heart of a shrimp is located in its head.",
+      "There are more bacterial cells in your body than human cells.",
+      "Some metals, like gallium, can melt in your hand.",
+      "The longest recorded flight of a chicken is 13 seconds.",
+      "A snail can sleep up to three years.",
+      "The human body contains enough iron to make a small nail.",
+      "Venus spins clockwise, the opposite direction to most planets.",
+      "A hectare is about the size of a rugby field.",
+      "The first computer mouse was made of wood.",
+      "Sound travels faster in water than in air.",
+      "There's a species of jellyfish that is biologically immortal in ideal conditions.",
+      "The shortest war in history lasted 38 minutes (UK vs Zanzibar, 1896).",
+      "Kangaroos can't walk backwards.",
+      "The moon has moonquakes.",
+      "Slugs have four noses.",
+      "The world's smallest reptile is smaller than a grain of rice.",
+      "Cows have best friends and get stressed when separated.",
+      "The Amazon rainforest produces around 20% of the world's oxygen.",
+      "There are more species of beetles than any other animal group.",
+      "A single teaspoon of soil contains more microorganisms than there are people on Earth.",
+      "Alaska is the state with the highest percentage of area covered by water in the USA.",
+      "The fingerprints of a koala are so similar to humans that they can confuse crime scene investigators.",
+      "The largest volcano in the solar system is Olympus Mons on Mars.",
+      "The Great Wall of China is not visible from the Moon with the naked eye.",
+      "Butterflies taste with their feet.",
+      "The average person walks about 100,000 miles in their lifetime.",
+      "A caterpillar has more muscles than a human does.",
+      "Pineapple takes almost two years to grow.",
+      "Camels have three eyelids to protect their eyes from sand.",
+      "A day on Earth is getting longer by about 1.8 milliseconds per century.",
+      "Some trees can live for thousands of years; the oldest known is over 5,000 years old.",
+      "The first footprints on the Moon will remain for millions of years, as there's no wind to erode them.",
+      "The word 'astronaut' comes from Greek words meaning 'star sailor'.",
+      "The tallest mammal is the giraffe; its tongue can be about 45 cm long.",
+      "A newborn kangaroo is about the size of a lima bean.",
+      "Human bones are ounce-for-ounce stronger than steel.",
+      "Peanuts are not nuts; they're legumes.",
+      "The majority of Earth's oxygen comes from ocean phytoplankton, not forests.",
+      "A single bolt of lightning is five times hotter than the surface of the Sun.",
+      "Tardigrades can survive in space and endure extreme conditions.",
+      "Some ants can create living bridges with their bodies.",
+      "Dolphins have been observed teaching their young to use tools.",
+      "The world's deepest postbox is in Susami Bay, Japan — 10 meters underwater.",
+      "Popcorn was invented thousands of years ago by indigenous peoples of the Americas.",
+      "The international space station travels at roughly 28,000 km/h.",
+      "Venom and poison are different: venom is injected, poison is ingested or touched.",
+      "A teaspoon of a neutron star would weigh about 6 billion tons.",
+      "The first vaccine was developed by Edward Jenner for smallpox in 1796.",
+      "Shakespeare invented many common English phrases.",
+      "The largest living structure on Earth is the Great Barrier Reef.",
+      "A hummingbird's heart can beat over 1,200 times per minute.",
+      "Glass is an amorphous solid — it behaves like a very slow-moving liquid on geological timescales.",
+      "The deepest part of the ocean is the Mariana Trench, about 11 km deep.",
+      "Polar bears have black skin under their white fur.",
+      "Oxygen was not abundant in Earth's early atmosphere.",
+      "Arachibutyrophobia is the fear of peanut butter sticking to the roof of your mouth.",
+      "The human brain uses about 20% of the body's energy.",
+      "There are over 1,500 species of bamboo.",
+      "An adult human has 206 bones.",
+      "Electric eels can produce shocks up to 600 volts.",
+      "The average lifespan of a taste bud is about 10 days.",
+      "The Great Pyramid of Giza was the tallest man-made structure for over 3,800 years.",
+      "The color of a lobster's shell can change during cooking because of proteins releasing pigments.",
+      "Saturn's rings are mostly made of ice and rock particles.",
+      "Some plants can communicate with each other through chemical signals in the soil.",
+      "A bolt of lightning strikes somewhere on Earth about 100 times per second.",
+      "A single honeybee will produce about 1/12th of a teaspoon of honey in its lifetime.",
+      "The largest desert on Earth is Antarctica.",
+      "Jupiter is so big that all the other planets in the solar system could fit inside it.",
+      "The pace of timekeeping improved with atomic clocks, accurate to billionths of a second.",
+      "A full-grown ostrich can run up to 72 km/h.",
+      "The tallest tree species is the coastal redwood.",
+      "The largest internal organ in the human body is the liver.",
+      "Some fungi can glow in the dark (bioluminescent fungi).",
+      "The classic 'tip of the iceberg' means only a small portion of something is visible above the surface."
+    ];
+
+    const riddles = [
+      "I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I? — An echo.",
+      "What can travel around the world while staying in a corner? — A stamp.",
+      "What has keys but can't open locks? — A piano.",
+      "What gets wetter as it dries? — A towel.",
+      "What has a head and a tail but no body? — A coin.",
+      "What can you keep after giving it to someone? — Your word.",
+      "What has hands but can't clap? — A clock.",
+      "I have cities, but no houses; mountains, but no trees; and water, but no fish. What am I? — A map.",
+      "The more of this there is, the less you see. What is it? — Darkness.",
+      "What runs but never walks? — Water.",
+      "What has many teeth but can't bite? — A comb.",
+      "I am full of holes but still hold water. What am I? — A sponge.",
+      "What belongs to you but others use it more than you do? — Your name.",
+      "What can you break, even if you never pick it up or touch it? — A promise.",
+      "What has one eye but can't see? — A needle.",
+      "What gets bigger the more you take away? — A hole.",
+      "What goes up but never comes down? — Your age.",
+      "Forward I am heavy, backward I am not. What am I? — Ton.",
+      "What has a neck but no head? — A bottle.",
+      "What can fill a room but takes up no space? — Light.",
+      "What kind of coat is always wet when you put it on? — A coat of paint.",
+      "What building has the most stories? — A library.",
+      "I have branches, but no fruit, trunk or leaves. What am I? — A bank.",
+      "What has to be broken before you can use it? — An egg.",
+      "What goes through cities and fields but never moves? — A road.",
+      "What can't talk but will reply when spoken to? — An echo.",
+      "What has four wheels and flies? — A garbage truck.",
+      "What is always coming but never arrives? — Tomorrow.",
+      "What starts with 'e' and ends with 'e' but only contains one letter? — An envelope.",
+      "What can you catch but not throw? — A cold.",
+      "What has holes all over but still holds water? — A sponge.",
+      "What invention lets you look right through a wall? — A window.",
+      "What tastes better than it smells? — A tongue.",
+      "What goes up and down stairs without moving? — A carpet.",
+      "What has a thumb and four fingers but is not alive? — A glove.",
+      "What runs around the yard without moving? — A fence.",
+      "What has two hands but cannot clap? — A clock.",
+      "What kind of tree can you carry in your hand? — A palm.",
+      "What has an eye but cannot see? — A hurricane.",
+      "What has a ring but no finger? — A telephone.",
+      "The more you take, the more you leave behind. What are they? — Footsteps.",
+      "I’m tall when I’m young and short when I’m old. What am I? — A candle.",
+      "What building do cows go to? — Moo-seum.",
+      "What can point in every direction but can't move? — A compass.",
+      "What has one head, one foot and four legs? — A bed.",
+      "What runs all around a backyard, yet never moves? — A fence.",
+      "What can be cracked, made, told, and played? — A joke.",
+      "What is always in front of you but can’t be seen? — The future.",
+      "What has words but never speaks? — A book.",
+      "What is full of holes but still holds water? — A sponge.",
+      "What question can you never answer yes to? — Are you asleep yet?",
+      "What belongs to you but others use it more than you do? — Your name.",
+      "What goes up but never goes down? — Age.",
+      "I have a tail and a head, but no body. What am I? — A coin.",
+      "What is easy to lift but hard to throw? — A feather.",
+      "What kind of room has no doors or windows? — A mushroom.",
+      "What kind of band never plays music? — A rubber band.",
+      "What gets broken without being held? — A promise.",
+      "What runs, but never walks; has a mouth, but never talks? — A river.",
+      "What kind of tree grows in your hand? — A palm.",
+      "What is at the end of a rainbow? — The letter 'w'.",
+      "What has a bottom at the top? — A leg.",
+      "What do you call a bear with no teeth? — A gummy bear.",
+      "What can you serve but not eat? — A volleyball.",
+      "What has a heart that doesn't beat? — An artichoke.",
+      "I am taken from a mine and shut up in a wooden case, from which I am never released, and yet I am used by almost everybody. What am I? — Pencil lead (graphite).",
+      "What has hands but cannot clap? — A clock.",
+      "What kind of tree can you carry in your hand? — A palm.",
+      "What comes down but never goes up? — Rain.",
+      "What has sixteen legs and cannot walk? — Eight pairs of shoes.",
+      "What can be cracked, made, told, and played? — A joke.",
+      "What is so fragile that saying its name breaks it? — Silence.",
+      "What has many keys but can't open a single lock? — A piano.",
+      "What building has the most stories? — A library.",
+      "What is always in front of you but can’t be seen? — The future.",
+      "What belongs to you but others use it more than you? — Your name.",
+      "What invention lets you look right through a wall? — A window.",
+      "What has branches but no fruit, trunk or leaves? — A bank.",
+      "What has a neck but no head? — A bottle.",
+      "What runs around the whole yard without moving? — A fence.",
+      "What is at the end of a rainbow? — The letter W.",
+      "What can you catch but not throw? — A cold.",
+      "What is always coming but never arrives? — Tomorrow.",
+      "What has one eye but can’t see? — A needle.",
+      "What kind of room has no doors or windows? — A mushroom."
+    ];
+
+    // Ensure all arrays have at least 100 items; if not, repeat to reach 100
+    function ensureHundred(arr){
+      const out = arr.slice();
+      let i=0;
+      while(out.length < 100){
+        out.push(arr[i % arr.length]);
+        i++;
+      }
+      return out;
+    }
+    const Q = ensureHundred(quotes);
+    const F = ensureHundred(facts);
+    const R = ensureHundred(riddles);
+
+    /*********************
+     * Fun box interactions
+     *********************/
+    let currentCategory = 'quotes';
+    let quoteIndex = 0;
+    const funBox = document.getElementById('funBox');
+
+    function showCategory(cat){
+      currentCategory = cat;
+      if(cat === 'quotes') showNextQuoteInBox();
+      if(cat === 'facts') showRandomFact();
+      if(cat === 'riddles') showRandomRiddle();
+    }
+    function showNextQuoteInBox(){
+      funBox.textContent = Q[quoteIndex % Q.length];
+      quoteIndex = (quoteIndex + 1) % Q.length;
+    }
+    function showRandomFact(){
+      funBox.textContent = F[Math.floor(Math.random()*F.length)];
+    }
+    function showRandomRiddle(){
+      funBox.textContent = R[Math.floor(Math.random()*R.length)];
+    }
+    function shuffleFunBox(){
+      if(currentCategory === 'quotes') showNextQuoteInBox();
+      else if(currentCategory === 'facts') showRandomFact();
+      else showRandomRiddle();
+    }
+    // initialize with a quote
+    showNextQuoteInBox();
+
+    /*********************
+     * Toast notification system (bottom-right)
+     * - show quote every 15 minutes (180000 ms)
+     * - toast disappears after 5 minutes (120000 ms)
+     *********************/
+    const toastContainer = document.getElementById('toast-container');
+    let toastIndex = 0;
+
+    function createToast(text){
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<div>${text}</div><small>Study Sphere — a quick thought for you</small>`;
+      toastContainer.appendChild(toast);
+      // show with animation
+      requestAnimationFrame(() => { toast.classList.add('show'); });
+      // remove after 5 minutes
+      const removeAfter = 120000; // 5 minutes
+      const timer = setTimeout(()=> {
+        toast.classList.remove('show');
+        setTimeout(()=> { toast.remove(); }, 300);
+      }, removeAfter);
+      // allow manual close by clicking toast (optional quick close)
+      toast.addEventListener('click', ()=> {
+        clearTimeout(timer);
+        toast.classList.remove('show');
+        setTimeout(()=> toast.remove(), 240);
+      });
+    }
+
+    function showNextToast(){
+      // use sequential quotes
+      const text = Q[toastIndex % Q.length];
+      toastIndex = (toastIndex + 1) % Q.length;
+      createToast(text);
+    }
+
+    // initial toast after 5s, then every 15 minutes
+    setTimeout(showNextToast, 5000);
+    setInterval(showNextToast, 180000);
+
+    /*********************
+     * Misc small helpers
+     *********************/
+    // show page 1 on load
+    showPage(0);
+
+    // ensure arrows visible state
+    document.getElementById('arrow-back').style.display = 'none';
+  </script>
+</body>
+</html>  
