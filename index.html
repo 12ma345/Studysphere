@@ -6,7 +6,7 @@
 
 <meta charset="UTF-8" />
 <title>Study Sphere — Learn. Play. Grow.</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
   :root{
     --bg1:#e6f0ff;
@@ -34,18 +34,17 @@
     justify-content:center;
     padding:18px;
   }
-body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-}
 
-.container {
-  width: 100%;
-  max-width: 1000px;
-  margin: auto;
-  padding: 15px;
-}
+  .app {
+    width:100%;
+    max-width:1100px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95));
+    border-radius:20px;
+    box-shadow: var(--shadow);
+    padding:18px;
+    position:relative;
+    overflow:hidden;
+  }
 
   /* Top arrows (back & next) */
   .nav-arrow {
@@ -149,6 +148,7 @@ body {
   }
   .subjectItem h4{ margin:8px 0 4px 0; color:var(--accent); }
   .subjectItem small{ color:var(--muted); display:block; }
+
   /* Subject content */
   #subjectContent {
     margin-top:12px;
@@ -231,20 +231,6 @@ body {
     .welcome .right{ width:100%; }
     #arrow-next, #arrow-back { width:40px; height:40px; top:12px; }
   }
-
-@media (max-width: 768px) {
-  body {
-    font-size: 16px;
-  }
-
-  h1 {
-    font-size: 22px;
-  }
-
-  nav {
-    flex-direction: column;
-  }
-}
   /* =====================
    DARK MODE
 ===================== */
@@ -389,8 +375,6 @@ body.dark iframe {
           <div class="tabs" style="margin-top:12px;">
             <button class="tabBtn" onclick="showContent('Textbooks')">Textbooks</button>
             <button class="tabBtn" onclick="showContent('Videos')">Videos</button>
-            <button onclick="showContent('Videos')">Videos</button>
-<div id="subjectDetail"></div>
             <button id="calcTab" class="tabBtn" onclick="showContent('Calculator')" style="display:none;">Calculator</button>
           </div>
 
@@ -559,17 +543,10 @@ const videos = {
   },
 
   "Grade 8": {
-     Amharic: [
-      {
-        title: "Amharic Grade 8 – Lesson 1",
-        link: "https://www.youtube.com/embed/VIDEO_ID"
-      }
-    ],
     "English": [
       {
         title: "English Grade 8 – Introduction",
-       link: "https://www.youtube.com/embed/_ot_60yeClo"
-
+        link: "https://www.youtube.com/embed/_ot_60yeClo"
       }
     ],
 
@@ -581,29 +558,6 @@ const videos = {
     ]
   }
 };
- "General Science" [
-      {
-        title: "General Science Grade 8 – Matter",
-        link: "https://www.youtube.com/embed/VIDEO_ID"
-      }
-    ],
-
-    "Social Study" [
-      {
-        title: "Social Study Grade 8 – Geography Basics",
-        link: "https://www.youtube.com/embed/VIDEO_ID"
-      }
-    ],
-
-    "Citizenship" [
-      {
-        title: "Citizenship Grade 8 – Rights and Duties",
-        link: "https://www.youtube.com/embed/VIDEO_ID"
-      }
-    ]
-
-  
-
 
 
         
@@ -625,8 +579,7 @@ const videos = {
 
     function showContent(cat){
     function showContent(cat){
- alert(cat);
-}
+
   const subject = document.getElementById('subjectTitle').textContent;
 
   if (!subject || !selectedGrade) {
@@ -703,6 +656,7 @@ const videos = {
 
   document.getElementById("subjectDetail").innerHTML = html;
 }
+
       const subject = document.getElementById('subjectTitle').textContent;
       if(!subject) { alert('Open a subject first.'); return; }
       const data = subjectData[selectedGrade][subject][cat];
@@ -729,6 +683,7 @@ const videos = {
         }
       }
       document.getElementById('subjectDetail').innerHTML = html;
+    }
 
     function checkAnswer(i){
       const radios = document.getElementsByName('quiz'+i);
@@ -1149,4 +1104,4 @@ const videos = {
     document.getElementById('arrow-back').style.display = 'none';
   </script>
 </body>
-</html>
+</html>  
